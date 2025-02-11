@@ -128,15 +128,21 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger'
 }
 
-EMAIL_HOST = 'stmp.gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'  # Corrected spelling
 EMAIL_HOST_USER = 'engr.hassanyousuf@gmail.com'
-EMAIL_HOST_PASSWORD = 'test@1947'
+EMAIL_HOST_PASSWORD = 'test@1947'  # Consider using environment variables for security
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.stmp.EmailBackend'
+EMAIL_HOST_PASSWORD = 'qmjy imil tggh jrlw'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Corrected spelling
+
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+
+#qmjy imil tggh jrlw
