@@ -1,0 +1,262 @@
+{% extends "nav.html" %}
+{% load static %}
+
+{% block title %}Checkout - GOBUY{% endblock title %}
+
+{% block style %}
+<style>
+    .checkout-form {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .order-summary {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .form-label {
+        font-weight: 500;
+    }
+    .form-control, .form-select {
+        border-radius: 6px;
+    }
+    .btn-primary {
+        border-radius: 6px;
+    }
+    .list-group-item {
+        border-radius: 6px;
+    }
+    .badge {
+        font-size: 14px;
+    }
+    .payment-status {
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    .payment-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .payment-failed {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .required-field::after {
+        content: "*";
+        color: red;
+        margin-left: 4px;
+    }
+    .empty-cart-message {
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+    }
+    @media (max-width: 768px) {
+        .checkout-form, .order-summary {
+            padding: 15px;
+        }
+        .btn-lg {
+            font-size: 16px;
+        }
+    }
+    @media (max-width: 576px) {
+        .row > div[class^="col-"] {
+            margin-bottom: 10px;
+        }
+    }
+</style>
+{% endblock style %}
+
+{% block body %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Checkout</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <form class="checkout-form" id="checkout-form" method="POST" action="{% url 'Checkout' %}">
+                {% csrf_token %}
+                <input type="hidden" id="itemJson" name="itemJson" value="">
+                <input type="hidden" id="amt" name="amt" value="">
+                
+                {% if messages %}
+                <div class="alert alert-danger mb-4">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <h4 class="mb-3">Billing Details</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="firstName" class="form-label required-field">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lastName" class="form-label required-field">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label required-field">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label required-field">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10,15}" title="Please enter a valid phone number" required>
+                    <small class="text-muted">Format: 10-15 digits without spaces or special characters</small>
+                </div>
+                <div class="mb-3">
+                    <label for="address1" class="form-label required-field">Address Line 1</label>
+                    <input type="text" class="form-control" id="address1" name="address" required>
+                </div>
+                <div class="mb-3">
+                    <label for="address2" class="form-label">Address Line 2</label>
+                    <input type="text" class="form-control" id="address2" name="address2" placeholder="Apartment, suite, unit, building, floor, etc.">
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="city" class="form-label required-field">City</label>
+                        <input type="text" class="form-control" id="city" name="city" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="state" class="form-label required-field">State</label>
+                        <input type="text" class="form-control" id="state" name="state" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="zip" class="form-label required-field">Zip Code</label>
+                        <input type="text" class="form-control" id="zip" name="zip" required>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div id="checkout-button-container">
+                    <button class="btn btn-primary btn-lg w-100" type="submit" id="checkout-button">Proceed to Payment</button>
+                </div>
+            </form>
+
+            <div id="payment-status" class="payment-status">
+                <p id="payment-message"></p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="order-summary">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Your Cart</span>
+                    <span class="badge bg-primary rounded-pill" id="cart-count">0</span>
+                </h4>
+                <ul class="list-group mb-3" id="items">
+                    <!-- Cart items dynamically added -->
+                </ul>
+                <div class="d-flex justify-content-between mt-3">
+                    <span class="fw-bold">Total (EUR)</span>
+                    <strong id="totalprice">€0.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize cart
+        if (localStorage.getItem('cart') == null) {
+            var cart = {};
+        } else {
+            cart = JSON.parse(localStorage.getItem('cart'));
+        }
+
+        var sum = 0;
+        var totalPrice = 0;
+
+        // Populate cart items
+        if ($.isEmptyObject(cart)) {
+            $('#items').html('<div class="empty-cart-message">Your cart is empty. Please add some items to proceed.</div>');
+            $('#checkout-button').prop('disabled', true);
+            $('#checkout-button').text('Cart is Empty');
+        } else {
+            for (item in cart) {
+                let name = cart[item][1];
+                let qty = cart[item][0];
+                let price = cart[item][2];
+                sum += qty;
+                totalPrice += qty * price;
+                $('#items').append(`<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="my-0">${name}</h6>
+                        <small class="text-muted">Quantity: ${qty}</small>
+                    </div>
+                    <span class="text-muted">€${(price * qty).toFixed(2)}</span>
+                </li>`);
+            }
+            $('#totalprice').text(`€${totalPrice.toFixed(2)}`);
+            $('#cart-count').text(sum);
+        }
+
+        // Set form values
+        $('#itemJson').val(JSON.stringify(cart));
+        $('#amt').val(totalPrice.toFixed(2));
+
+        // Form validation
+        $('#checkout-form').submit(function(event) {
+            if ($.isEmptyObject(cart)) {
+                event.preventDefault();
+                alert('Your cart is empty. Please add items before checkout.');
+                return false;
+            }
+            
+            // Basic form validation
+            const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address1', 'city', 'state', 'zip'];
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                const value = $(`#${field}`).val().trim();
+                if (!value) {
+                    isValid = false;
+                    $(`#${field}`).addClass('is-invalid');
+                } else {
+                    $(`#${field}`).removeClass('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                event.preventDefault();
+                alert('Please fill in all required fields.');
+                return false;
+            }
+            
+            // Disable button to prevent double submission
+            $('#checkout-button').prop('disabled', true);
+            $('#checkout-button').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+        });
+
+        // Handle payment status if redirected back
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('payment_status')) {
+            const status = urlParams.get('payment_status');
+            const message = urlParams.get('message');
+            const paymentStatusDiv = document.getElementById('payment-status');
+            const paymentMessage = document.getElementById('payment-message');
+
+            paymentMessage.textContent = message;
+            if (status === 'success') {
+                paymentStatusDiv.classList.add('payment-success');
+                localStorage.removeItem('cart');
+                // Update cart count in navbar
+                document.getElementById('cart').textContent = '0';
+            } else {
+                paymentStatusDiv.classList.add('payment-failed');
+            }
+            paymentStatusDiv.style.display = 'block';
+        }
+    });
+</script>
+{% endblock script %}

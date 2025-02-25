@@ -1,0 +1,522 @@
+{% extends "nav.html" %}
+{% load static %}
+
+{% block title %}Order Tracker - GOBUY{% endblock title %}
+
+{% block style %}
+<style>
+    /* Hero section styling */
+    .tracker-hero {
+        background-color: #f8f9fa;
+        padding: 60px 0;
+        margin-bottom: 40px;
+    }
+    
+    .tracker-hero h2 {
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #0d6efd;
+    }
+    
+    .tracker-hero p {
+        color: #6c757d;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    /* Form styling */
+    .tracker-form {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+    }
+    
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Order status styling */
+    .order-status {
+        margin-top: 30px;
+        padding: 25px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .status-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .status-header h4 {
+        margin-bottom: 0;
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    
+    .order-date {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    /* Timeline styling */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+    
+    .timeline-item:before {
+        content: "";
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background-color: #dee2e6;
+    }
+    
+    .timeline-item:last-child:before {
+        height: 50%;
+    }
+    
+    .timeline-item:after {
+        content: "";
+        position: absolute;
+        left: -36px;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+    }
+    
+    .timeline-content {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timeline-date {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    /* List styling */
+    .list-group-item {
+        border-radius: 6px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .item-details {
+        flex-grow: 1;
+    }
+    
+    .item-name {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .item-quantity {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .badge {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+    
+    /* Button styling */
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Error and loading states */
+    .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 0.2em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border .75s linear infinite;
+        margin-right: 10px;
+    }
+    
+    @keyframes spinner-border {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Order summary */
+    .order-summary {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px;
+        background-color: #e9ecef;
+        border-radius: 6px;
+        margin-top: 15px;
+        font-weight: 600;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .tracker-hero {
+            padding: 40px 0;
+        }
+        
+        .tracker-hero h2 {
+            font-size: 2rem;
+        }
+        
+        .tracker-form {
+            padding: 20px;
+        }
+        
+        .order-status {
+            padding: 15px;
+        }
+    }
+</style>
+{% endblock style %}
+
+{% block body %}
+<!-- Hero Section -->
+<section class="tracker-hero">
+    <div class="container text-center">
+        <h2>Track Your Order</h2>
+        <p>Enter your order details below to check the current status of your purchase.</p>
+    </div>
+</section>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <form id="trackerform" class="tracker-form">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="orderId" class="form-label">Order ID</label>
+                    <input type="text" class="form-control" id="orderId" name="orderId" placeholder="Enter your order ID" required>
+                    <div class="invalid-feedback">Please enter a valid Order ID.</div>
+                </div>
+                <div class="mb-4">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter the email used for order" required>
+                    <div class="invalid-feedback">Please enter a valid email address.</div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="track-button">Track Order</button>
+            </form>
+
+            <!-- Loading indicator -->
+            <div id="loading-indicator" class="text-center mt-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Retrieving your order information...</p>
+            </div>
+
+            <!-- Error message -->
+            <div id="error-message" class="error-message" style="display: none;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span id="error-text">Sorry, we could not find an order with this ID and email. Please check and try again.</span>
+            </div>
+
+            <!-- Order status -->
+            <div id="order-status" class="order-status" style="display: none;">
+                <div class="status-header">
+                    <h4>Order Status</h4>
+                    <span id="order-date" class="order-date"></span>
+                </div>
+                <div class="timeline" id="updates-timeline">
+                    <!-- Order updates dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Order details -->
+            <div id="order-details" class="order-status" style="display: none;">
+                <div class="status-header">
+                    <h4>Ordered Items</h4>
+                </div>
+                <ul class="list-group" id="citems">
+                    <!-- Ordered items dynamically added here -->
+                </ul>
+                <div id="order-summary" class="order-summary">
+                    <span>Total</span>
+                    <span id="order-total">€0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Form validation function
+    function validateForm() {
+        let isValid = true;
+        const orderId = $('#orderId').val().trim();
+        const email = $('#email').val().trim();
+        
+        if (!orderId) {
+            $('#orderId').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#orderId').removeClass('is-invalid');
+        }
+        
+        if (!email || !email.includes('@')) {
+            $('#email').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#email').removeClass('is-invalid');
+        }
+        
+        return isValid;
+    }
+    
+    // Reset results function
+    function resetResults() {
+        $('#updates-timeline').empty();
+        $('#citems').empty();
+        $('#order-status').hide();
+        $('#order-details').hide();
+        $('#error-message').hide();
+        $('#loading-indicator').show();
+    }
+    
+    // Handle form submission
+    $('#trackerform').submit(function(event) {
+        event.preventDefault();
+        
+        // Validate form
+        if (!validateForm()) {
+            return false;
+        }
+        
+        // Reset previous results and show loading
+        resetResults();
+        
+        // Disable button
+        const submitBtn = $('#track-button');
+        const originalBtnText = submitBtn.text();
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Tracking...');
+        
+        // Prepare form data
+        var formData = {
+            'orderId': $('#orderId').val().trim(),
+            'email': $('#email').val().trim(),
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        };
+        
+        console.log('Sending request with data:', formData);
+
+        // Send AJAX request
+        $.ajax({
+            type: 'POST',
+            url: '/tracker',
+            data: formData,
+            dataType: 'text',
+            encode: true,
+            timeout: 10000 // 10 second timeout
+        })
+        .done(function(response) {
+            // Hide loading indicator
+            $('#loading-indicator').hide();
+            
+            console.log('Received response:', response);
+            
+            try {
+                // Parse the response data
+                const data = JSON.parse(response);
+                console.log('Parsed JSON data:', data);
+                
+                if (data && data.length > 0) {
+                    // Check if we have updates
+                    const updates = data[0];
+                    console.log('Updates data:', updates);
+                    
+                    // Try to parse cart items
+                    let cart;
+                    try {
+                        cart = JSON.parse(data[1]);
+                        console.log('Cart data:', cart);
+                    } catch (e) {
+                        console.error('Error parsing cart data:', e);
+                        cart = {};
+                    }
+                    
+                    // Display order status updates
+                    if (updates && updates.length > 0) {
+                        $('#order-status').show();
+                        
+                        // Display updates in timeline
+                        updates.forEach((update, index) => {
+                            const text = update.text || 'Status update';
+                            const time = update.time || '';
+                            
+                            const timelineItem = `
+                                <div class="timeline-item">
+                                    <div class="timeline-content">
+                                        <p class="mb-1">${text}</p>
+                                        ${time ? `<p class="timeline-date mb-0">${time}</p>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                            
+                            $('#updates-timeline').append(timelineItem);
+                            
+                            // Set order date from the first update
+                            if (index === 0 && update.time) {
+                                $('#order-date').text(`Ordered on ${update.time}`);
+                            }
+                        });
+                    } else {
+                        $('#order-status').show();
+                        $('#updates-timeline').html('<div class="text-center py-3">No status updates available for this order.</div>');
+                    }
+                    
+                    // Display ordered items
+                    if (cart && Object.keys(cart).length > 0) {
+                        $('#order-details').show();
+                        let totalAmount = 0;
+                        
+                        for (let item in cart) {
+                            if (cart.hasOwnProperty(item)) {
+                                const name = cart[item][1] || 'Product';
+                                const qty = cart[item][0] || 0;
+                                const price = cart[item][2] || 0;
+                                const itemTotal = qty * price;
+                                totalAmount += itemTotal;
+                                
+                                const itemHtml = `
+                                    <li class="list-group-item">
+                                        <div class="item-details">
+                                            <div class="item-name">${name}</div>
+                                            <div class="item-quantity">Quantity: ${qty}</div>
+                                        </div>
+                                        <span class="badge bg-primary">${qty} × €${price.toFixed(2)}</span>
+                                    </li>
+                                `;
+                                
+                                $('#citems').append(itemHtml);
+                            }
+                        }
+                        
+                        // Update total
+                        $('#order-total').text(`€${totalAmount.toFixed(2)}`);
+                    } else {
+                        $('#order-details').show();
+                        $('#citems').html('<li class="list-group-item text-center">No items found in this order.</li>');
+                        $('#order-summary').hide();
+                    }
+                } else {
+                    // No order found
+                    $('#error-message').show();
+                    console.log('No order data found in response');
+                }
+            } catch (error) {
+                console.error("Error parsing response:", error);
+                $('#error-text').text("There was an error processing your request. Please try again.");
+                $('#error-message').show();
+            }
+        })
+        .fail(function(error) {
+            // Hide loading indicator
+            $('#loading-indicator').hide();
+            
+            console.error("AJAX request failed:", error);
+            $('#error-text').text("Connection error. Please check your internet connection and try again.");
+            $('#error-message').show();
+        })
+        .always(function() {
+            // Reset button state
+            submitBtn.prop('disabled', false);
+            submitBtn.text(originalBtnText);
+        });
+    });
+    
+    // Clear validation errors on input
+    $('#orderId, #email').on('input', function() {
+        $(this).removeClass('is-invalid');
+    });
+    
+    // Check URL parameters for auto-filling the form
+    function checkUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const email = urlParams.get('email');
+        
+        if (orderId) {
+            $('#orderId').val(orderId);
+        }
+        
+        if (email) {
+            $('#email').val(email);
+        }
+        
+        // Auto-submit if both parameters are present
+        if (orderId && email) {
+            $('#track-button').click();
+        }
+    }
+    
+    // Run on page load
+    checkUrlParams();
+});
+</script>
+{% endblock script %}

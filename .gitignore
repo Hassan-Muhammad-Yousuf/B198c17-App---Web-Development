@@ -1,0 +1,15 @@
+# Ignore keys.py file in ecom_app directory
+ecom_app/keys.py
+
+# Ignore database files
+db.sqlite3
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+
+# Ignore Django migrations
+ecom_app/migrations/
+
+# Ignore environment files
+.env
