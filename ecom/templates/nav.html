@@ -10,7 +10,7 @@
   <meta name="keywords" content="ecommerce, shop, online shopping">
 
   <!-- Favicons -->
-  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/fav.png' %}" rel="icon">
   <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -131,6 +131,16 @@
       margin-bottom: 15px;
       display: block;
     }
+    
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Offset for fixed header */
+    section {
+      scroll-margin-top: 80px;
+    }
   </style>
 
   {% block style %}
@@ -144,15 +154,15 @@
 
       <a href="/" class="logo d-flex align-items-center me-auto">
         <img src="{% static 'assets/Logo.png' %}" alt="GOBUY Logo">
-        <h1 class="sitename">GOBUY</h1>
+        
       </a>
 
       <nav id="navmenu" class="navmenu">
         <ul>
             <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
             <li><a href="/purchase" class="{% if request.path == '/purchase' %}active{% endif %}">Products</a></li>
-            <li><a href="/about" class="{% if request.path == '/about' %}active{% endif %}">About</a></li>
-            <li><a href="/services" class="{% if request.path == '/services' %}active{% endif %}">Services</a></li>
+            <li><a href="{% if request.path == '/' %}#about{% else %}/#about{% endif %}" class="{% if request.path == '/about' %}active{% endif %}">About</a></li>
+            <li><a href="{% if request.path == '/' %}#services{% else %}/#services{% endif %}" class="{% if request.path == '/services' %}active{% endif %}">Services</a></li>
             <li><a href="/checkout" class="{% if request.path == '/checkout' %}active{% endif %}">Checkout</a></li>
             <li><a href="/tracker" class="{% if request.path == '/tracker' %}active{% endif %}">Track Order</a></li>
           
@@ -208,9 +218,9 @@
         <a href="#"><i class="bi bi-instagram"></i></a>
         <a href="#"><i class="bi bi-linkedin"></i></a>
       </div>
-      <div class="credits">
+      {% comment %} <div class="credits">
         Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-      </div>
+      </div> {% endcomment %}
     </div>
   </footer>
 
